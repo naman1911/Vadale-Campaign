@@ -90,4 +90,4 @@ To carry over emails counted before the switch, set `START_AT` in `wrangler.toml
   to control *Salvinia molesta* (Free Press Journal, Pudhari, Sakal reports).
 - History: Marathi Vishwakosh ("पनवेल") credits Balajipant Bapat with building the Vadale lake in the Peshwa era.
 - Addresses: Lok Sabha member profile (MP), Panvel Municipal Corporation contact page, Government of Maharashtra directory (CMO).
-  The MLA's address comes from his own website and should be confirmed with his office.
+  The MLA's address comes from his own website; a test email to it on 19 Nov 2026 was accepted without a bounce.

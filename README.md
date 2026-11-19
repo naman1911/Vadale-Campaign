@@ -20,6 +20,13 @@ that holds these files and the `/ (root)` folder, then Save. The page appears at
 
 There is nothing to build or install: it is plain HTML, CSS and JavaScript.
 
+## Updating the live site
+
+Any change pushed to a branch whose name starts with `claude/` is merged into `main` automatically
+by the *Publish to main* workflow (`.github/workflows/publish.yml`), and GitHub Pages republishes
+within a minute or two. No pull request is needed. If a change conflicts with `main`, the workflow
+fails and leaves `main` untouched.
+
 ## Changing things
 
 Everything editable is at the top of [`assets/app.js`](assets/app.js):

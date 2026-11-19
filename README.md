@@ -27,6 +27,10 @@ by the *Publish to main* workflow (`.github/workflows/publish.yml`), and GitHub 
 within a minute or two. No pull request is needed. If a change conflicts with `main`, the workflow
 fails and leaves `main` untouched.
 
+When `assets/style.css` or `assets/app.js` changes, raise the `?v=` number on both lines in
+`index.html`. Browsers keep these files for a while, and without a new number a phone can show
+the new page with the old script or styles.
+
 ## Changing things
 
 Everything editable is at the top of [`assets/app.js`](assets/app.js):

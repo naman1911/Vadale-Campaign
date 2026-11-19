@@ -1,0 +1,27 @@
+# Cloudflare Worker that keeps the "emails sent" count for the campaign page.
+# Deploy from the Cloudflare dashboard (Workers & Pages -> Create -> Import a
+# repository -> this repository). Nothing else needs setting up: the storage
+# below is created automatically on the first deploy.
+# Keep this the same as the repository name: the dashboard names the Worker after
+# the repository when importing, and the two must match.
+name = "vadale-campaign"
+main = "counter/worker.js"
+compatibility_date = "2025-10-01"
+workers_dev = true
+
+[observability]
+enabled = true
+
+[[durable_objects.bindings]]
+name = "COUNTER"
+class_name = "Counter"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["Counter"]
+
+[vars]
+# Only this website may add to the count (comma-separated if there is more than one).
+ALLOWED_ORIGIN = "https://naman1911.github.io"
+# Added to the count: emails recorded before this Worker took over.
+START_AT = "0"

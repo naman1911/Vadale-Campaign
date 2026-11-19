@@ -33,8 +33,14 @@ const CONFIG = {
   // Shown only if the tracker cannot be reached. Always labelled with its date.
   weedSnapshot: { date: "2026-11-17", pct: 90.9, from: { date: "2026-10-22", pct: 98.2 } },
 
-  // Shared "emails sent" counter (free Abacus counting service, no account needed).
-  counter: { base: "https://abacus.jasoncameron.dev", namespace: "vadale-campaign", key: "emails-sent" },
+  // Shared "emails sent" counter. "get" returns {"value": n}; "hit" adds one and
+  // returns the new {"value": n}. Our own Cloudflare Worker (counter/worker.js)
+  // uses hitMethod "POST"; the free Abacus service uses "GET".
+  counter: {
+    get: "https://abacus.jasoncameron.dev/get/vadale-campaign/emails-sent",
+    hit: "https://abacus.jasoncameron.dev/hit/vadale-campaign/emails-sent",
+    hitMethod: "GET",
+  },
 };
 
 /* ---------- the two letters ---------- */
@@ -356,7 +362,7 @@ function renderCount() {
   $("mail-sub").textContent = state.count === 0 ? t.mail_sub_zero : t.mail_sub;
 }
 
-// The free counting service is sometimes slow or briefly down, so nothing here
+// A counting service can be slow or briefly down, so nothing here
 // gives up after one try: reads and writes are retried, the last known number is
 // kept on the device, and an email that could not be recorded is sent again on
 // the next visit.
@@ -368,8 +374,9 @@ async function counterOnce(action) {
   const timer = setTimeout(() => ctl.abort(), 40000);
   try {
     // keepalive: the request still completes when the mail app takes over the screen
-    const res = await fetch(`${c.base}/${action}/${c.namespace}/${c.key}`, { cache: "no-store", keepalive: true, signal: ctl.signal });
-    if (res.status === 404 && action === "get") return 0;   // nobody has sent one yet
+    const hit = action === "hit";
+    const res = await fetch(hit ? c.hit : c.get, { method: hit ? c.hitMethod || "GET" : "GET", cache: "no-store", keepalive: true, signal: ctl.signal });
+    if (res.status === 404 && !hit) return 0;               // nobody has sent one yet
     if (!res.ok) throw new Error(res.status);
     return Number((await res.json()).value) || 0;
   } finally { clearTimeout(timer); }

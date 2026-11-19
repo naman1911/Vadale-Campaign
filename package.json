@@ -1,0 +1,12 @@
+{
+  "name": "vadale-campaign",
+  "private": true,
+  "description": "Only needed for the email-counter Worker (counter/worker.js). The website itself needs no build.",
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev"
+  },
+  "devDependencies": {
+    "wrangler": "^4"
+  }
+}

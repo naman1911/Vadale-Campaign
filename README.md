@@ -61,6 +61,29 @@ A link ending in `?lang=mr` opens the page directly in Marathi.
   No name, email address or other personal detail is sent to it. Because the counter is public,
   it is an honest indication, not an audited figure.
 
+## The email counter on Cloudflare (recommended)
+
+The free Abacus service proved slow and unreliable. `counter/worker.js` is our own counter,
+a Cloudflare Worker on the free plan (no card). It answers in a fraction of a second, counts
+two simultaneous taps correctly, accepts new emails only from the campaign page, and limits how
+many one network address can add per hour (30) so nobody can run the number up with a script.
+For that limit it keeps a scrambled form of the address for at most an hour; nothing else about
+visitors is stored.
+
+Setting it up, once:
+
+1. At dash.cloudflare.com go to *Workers & Pages → Create → Import a repository*, connect GitHub
+   and choose this repository. Keep the suggested name `vadale-campaign`, leave the build command
+   empty and the deploy command as `npx wrangler deploy`. Deploy.
+2. Open the Worker's address with `/get` on the end, for example
+   `https://vadale-campaign.<your-subdomain>.workers.dev/get`. It should show `{"value":0}`.
+3. In `assets/app.js` set `CONFIG.counter` to that address:
+   `get: "https://…workers.dev/get"`, `hit: "https://…workers.dev/hit"`, `hitMethod: "POST"`,
+   and raise the `?v=` number in `index.html`.
+
+To carry over emails counted before the switch, set `START_AT` in `wrangler.toml` to that number.
+`package.json` exists only for this Worker; the website itself still needs no build.
+
 ## Sources for the facts in the letter
 
 - Weed and weevils: Panvel Municipal Corporation, with ICAR-Directorate of Weed Research (Jabalpur),

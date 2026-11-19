@@ -56,6 +56,8 @@ A link ending in `?lang=mr` opens the page directly in Marathi.
   It counts each tap on "Open in my email app", once per device, so a few people who open the email
   but do not send it are included.
   The count is kept by [Abacus](https://abacus.jasoncameron.dev), a free public counting service.
+  That service is sometimes slow or briefly unavailable, so the page retries, remembers the last
+  number it saw, and records a missed email on the person's next visit.
   No name, email address or other personal detail is sent to it. Because the counter is public,
   it is an honest indication, not an audited figure.
 

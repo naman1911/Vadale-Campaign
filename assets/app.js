@@ -194,9 +194,10 @@ const T = {
 
 const $ = (id) => document.getElementById(id);
 const esc = (s) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const memory = {};   // used when the browser will not store anything (private mode)
 const store = {
-  get(k) { try { return localStorage.getItem(k); } catch { return null; } },
-  set(k, v) { try { localStorage.setItem(k, v); } catch { /* private mode: fine */ } },
+  get(k) { try { return localStorage.getItem(k) ?? memory[k] ?? null; } catch { return memory[k] ?? null; } },
+  set(k, v) { memory[k] = v; try { localStorage.setItem(k, v); } catch { /* private mode: fine */ } },
 };
 
 const MONTHS = {
@@ -355,25 +356,68 @@ function renderCount() {
   $("mail-sub").textContent = state.count === 0 ? t.mail_sub_zero : t.mail_sub;
 }
 
-async function counter(action) {
+// The free counting service is sometimes slow or briefly down, so nothing here
+// gives up after one try: reads and writes are retried, the last known number is
+// kept on the device, and an email that could not be recorded is sent again on
+// the next visit.
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+
+async function counterOnce(action) {
   const c = CONFIG.counter;
-  // keepalive: the request still completes when the mail app takes over the screen
-  const res = await fetch(`${c.base}/${action}/${c.namespace}/${c.key}`, { cache: "no-store", keepalive: true });
-  if (res.status === 404) return 0;           // nobody has sent one yet
-  if (!res.ok) throw new Error(res.status);
-  return Number((await res.json()).value) || 0;
+  const ctl = new AbortController();
+  const timer = setTimeout(() => ctl.abort(), 40000);
+  try {
+    // keepalive: the request still completes when the mail app takes over the screen
+    const res = await fetch(`${c.base}/${action}/${c.namespace}/${c.key}`, { cache: "no-store", keepalive: true, signal: ctl.signal });
+    if (res.status === 404 && action === "get") return 0;   // nobody has sent one yet
+    if (!res.ok) throw new Error(res.status);
+    return Number((await res.json()).value) || 0;
+  } finally { clearTimeout(timer); }
 }
 
-async function loadCount() {
-  try { state.count = await counter("get"); } catch { state.count = null; }
+async function counter(action, tries) {
+  for (let i = 0; ; i++) {
+    try { return await counterOnce(action); }
+    catch (err) {
+      if (i >= tries - 1) throw err;
+      await wait([1500, 5000, 12000][i] || 12000);
+    }
+  }
+}
+
+function setCount(n) {
+  state.count = Math.max(n, state.count || 0);   // the count only ever goes up
+  store.set("vadale_count", String(state.count));
   renderCount();
 }
 
-async function countMyEmail() {
-  if (store.get("vadale_sent")) return;        // one count per device
-  store.set("vadale_sent", "1");
-  if (state.count !== null) { state.count += 1; renderCount(); }
-  try { state.count = Math.max(await counter("hit"), state.count || 0); renderCount(); } catch { /* shown locally only */ }
+async function loadCount() {
+  const saved = Number(store.get("vadale_count"));
+  if (saved > 0) { state.count = saved; renderCount(); }
+  recordMyEmail();                               // finish an earlier unrecorded email, if any
+  try { setCount(await counter("get", 3)); } catch { /* keep the saved number, or the dash */ }
+}
+
+// vadale_sent: "pending" = this device opened the email but the counter has not
+// confirmed it yet; "done" = recorded. One count per device.
+let recording = false;
+async function recordMyEmail() {
+  if (recording || store.get("vadale_sent") !== "pending") return;
+  recording = true;
+  try {
+    const value = await counter("hit", 4);
+    store.set("vadale_sent", "done");
+    setCount(value);
+  } catch { /* stays pending; tried again on the next visit */ }
+  recording = false;
+}
+
+function countMyEmail() {
+  if (!store.get("vadale_sent")) {
+    store.set("vadale_sent", "pending");
+    if (state.count !== null) { state.count += 1; renderCount(); }
+  }
+  recordMyEmail();
 }
 
 /* ---------- sending ---------- */
@@ -425,7 +469,9 @@ function wire() {
 
   // Back from the mail app: bring the thank-you into view.
   document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState !== "visible" || !state.showThanks) return;
+    if (document.visibilityState !== "visible") return;
+    recordMyEmail();
+    if (!state.showThanks) return;
     state.showThanks = false;
     $("thanks").scrollIntoView({ behavior: "smooth", block: "nearest" });
   });
@@ -439,6 +485,10 @@ function wire() {
     $("share-link").textContent = ok ? T[state.lang].link_copied : T[state.lang].share_link;
   });
 }
+
+// Emails opened before the counter was made retry-safe were marked "1" without
+// ever being recorded; treat them as still waiting to be counted.
+if (store.get("vadale_sent") === "1") store.set("vadale_sent", "pending");
 
 state.lang = pickLanguage();
 wire();

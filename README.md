@@ -15,8 +15,11 @@ The page also shows two live numbers:
 ## Publishing it (one time)
 
 *Settings → Pages → Build and deployment → Source: Deploy from a branch*, pick the branch
-that holds these files and the `/ (root)` folder, then Save. The page appears at
-`https://naman1911.github.io/Vadale-Campaign/` a minute or two later.
+that holds these files and the `/ (root)` folder, then Save.
+
+The page is served at **https://vadale.peopleofpanvel.com/**. The `CNAME` file ties that address to
+GitHub Pages; the domain's DNS has a `CNAME` record `vadale` → `naman1911.github.io`. The older
+address `https://naman1911.github.io/Vadale-Campaign/` redirects there.
 
 There is nothing to build or install: it is plain HTML, CSS and JavaScript.
 

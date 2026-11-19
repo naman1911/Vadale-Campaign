@@ -33,13 +33,12 @@ const CONFIG = {
   // Shown only if the tracker cannot be reached. Always labelled with its date.
   weedSnapshot: { date: "2026-11-17", pct: 90.9, from: { date: "2026-10-22", pct: 98.2 } },
 
-  // Shared "emails sent" counter. "get" returns {"value": n}; "hit" adds one and
-  // returns the new {"value": n}. Our own Cloudflare Worker (counter/worker.js)
-  // uses hitMethod "POST"; the free Abacus service uses "GET".
+  // Shared "emails sent" counter: our own Cloudflare Worker (counter/worker.js).
+  // "get" returns {"value": n}; "hit" adds one and returns the new {"value": n}.
   counter: {
-    get: "https://abacus.jasoncameron.dev/get/vadale-campaign/emails-sent",
-    hit: "https://abacus.jasoncameron.dev/hit/vadale-campaign/emails-sent",
-    hitMethod: "GET",
+    get: "https://vadale-campaign.nityaamanbhagat.workers.dev/get",
+    hit: "https://vadale-campaign.nityaamanbhagat.workers.dev/hit",
+    hitMethod: "POST",
   },
 };
 

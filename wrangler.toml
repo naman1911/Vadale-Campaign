@@ -24,4 +24,4 @@ new_sqlite_classes = ["Counter"]
 # Only this website may add to the count (comma-separated if there is more than one).
 ALLOWED_ORIGIN = "https://naman1911.github.io"
 # Added to the count: emails recorded before this Worker took over.
-START_AT = "0"
+START_AT = "2"

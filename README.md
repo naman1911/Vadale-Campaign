@@ -55,15 +55,14 @@ A link ending in `?lang=mr` opens the page directly in Marathi.
 - **Emails sent.** The site cannot see anyone's mailbox, so it cannot know that an email really left.
   It counts each tap on "Open in my email app", once per device, so a few people who open the email
   but do not send it are included.
-  The count is kept by [Abacus](https://abacus.jasoncameron.dev), a free public counting service.
-  That service is sometimes slow or briefly unavailable, so the page retries, remembers the last
-  number it saw, and records a missed email on the person's next visit.
-  No name, email address or other personal detail is sent to it. Because the counter is public,
-  it is an honest indication, not an audited figure.
+  The count is kept by our own Cloudflare Worker (see below). The page retries if a request fails,
+  remembers the last number it saw, and records a missed email on the person's next visit.
+  No name, email address or other personal detail is sent to it. It is an honest indication,
+  not an audited figure.
 
-## The email counter on Cloudflare (recommended)
+## The email counter on Cloudflare
 
-The free Abacus service proved slow and unreliable. `counter/worker.js` is our own counter,
+The free Abacus service used at first proved slow and unreliable. `counter/worker.js` is our own counter,
 a Cloudflare Worker on the free plan (no card). It answers in a fraction of a second, counts
 two simultaneous taps correctly, accepts new emails only from the campaign page, and limits how
 many one network address can add per hour (30) so nobody can run the number up with a script.

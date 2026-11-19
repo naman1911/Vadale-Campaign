@@ -35,10 +35,6 @@ const CONFIG = {
 
   // Shared "emails sent" counter (free Abacus counting service, no account needed).
   counter: { base: "https://abacus.jasoncameron.dev", namespace: "vadale-campaign", key: "emails-sent" },
-
-  // Gmail's web compose link breaks when it gets too long (Marathi text is
-  // long once encoded). Above this size the letter is copied for pasting instead.
-  gmailMaxUrl: 6000,
 };
 
 /* ---------- the two letters ---------- */
@@ -125,21 +121,16 @@ const T = {
     m_cc: "Copy to",
     m_subject: "Subject",
     send_app: "Open in my email app",
-    send_gmail: "Open in Gmail",
     send_copy: "Copy the text",
     privacy: "This website sends nothing and stores nothing about you. The email goes from your own mailbox, and you can edit it before sending.",
-    confirm_q: "Did you send the email?",
-    confirm_yes: "Yes, I sent it",
-    confirm_no: "Not yet",
     thanks_h: "Thank you. The lake has one more voice.",
     thanks_p: "Now pass it on. Five more emails from people you know will do more than anything else.",
     share_wa: "Share on WhatsApp",
     share_link: "Copy the link",
     foot_about: 'A citizens\' campaign for Vadale Lake, Panvel. Follow <a href="https://instagram.com/savevadalelake" target="_blank" rel="noopener">@savevadalelake</a> on Instagram.',
-    foot_data: (u) => `Weed cover is a satellite estimate from <a href="${u}" target="_blank" rel="noopener">Vadale Lake Watch</a> (Copernicus Sentinel-2 images). The email count is the number of people who confirmed on this page that they sent it.`,
+    foot_data: (u) => `Weed cover is a satellite estimate from <a href="${u}" target="_blank" rel="noopener">Vadale Lake Watch</a> (Copernicus Sentinel-2 images). The email count is the number of times the email was opened from this page, counted once per device.`,
     need_name: "Please add your name so the letter is signed.",
     copied: "Copied. Paste it into a new email.",
-    gmail_paste: "Gmail is opening. The letter is copied: paste it into the message.",
     link_copied: "Link copied.",
     copy_failed: "Could not copy. Please select the text and copy it.",
     share_text: "Vadale Lake is healing, thanks to 70,000 tiny weevils. Manual cleaning could undo their work. Send one email to our MP and MLA. It takes 30 seconds:",
@@ -182,21 +173,16 @@ const T = {
     m_cc: "प्रत",
     m_subject: "विषय",
     send_app: "माझ्या ईमेल ॲपमध्ये उघडा",
-    send_gmail: "Gmail मध्ये उघडा",
     send_copy: "मजकूर कॉपी करा",
     privacy: "ही वेबसाइट काहीही पाठवत नाही आणि तुमची कोणतीही माहिती साठवत नाही. ईमेल तुमच्याच मेलबॉक्समधून जातो; पाठवण्यापूर्वी तुम्ही त्यात बदल करू शकता.",
-    confirm_q: "ईमेल पाठवला का?",
-    confirm_yes: "हो, पाठवला",
-    confirm_no: "अजून नाही",
     thanks_h: "धन्यवाद. तलावासाठी आणखी एक आवाज उठला.",
     thanks_p: "आता हे इतरांपर्यंत पोहोचवा. तुमच्या ओळखीतल्या आणखी पाच जणांचे ईमेल सर्वांत मोलाचे ठरतील.",
     share_wa: "WhatsApp वर शेअर करा",
     share_link: "लिंक कॉपी करा",
     foot_about: 'पनवेलच्या वडाळे तलावासाठी नागरिकांची मोहीम. Instagram वर <a href="https://instagram.com/savevadalelake" target="_blank" rel="noopener">@savevadalelake</a> ला फॉलो करा.',
-    foot_data: (u) => `जलपर्णीचे प्रमाण हा <a href="${u}" target="_blank" rel="noopener">Vadale Lake Watch</a> वरील उपग्रह अंदाज आहे (Copernicus Sentinel-2 छायाचित्रे). ईमेलची संख्या म्हणजे या पानावर 'पाठवला' असे कळवलेल्या लोकांची संख्या.`,
+    foot_data: (u) => `जलपर्णीचे प्रमाण हा <a href="${u}" target="_blank" rel="noopener">Vadale Lake Watch</a> वरील उपग्रह अंदाज आहे (Copernicus Sentinel-2 छायाचित्रे). ईमेलची संख्या म्हणजे या पानावरून ईमेल किती वेळा उघडला गेला ती संख्या; प्रत्येक उपकरणावरून एकदाच मोजली जाते.`,
     need_name: "कृपया तुमचे नाव लिहा, म्हणजे पत्रावर तुमची सही राहील.",
     copied: "कॉपी झाले. नवीन ईमेलमध्ये पेस्ट करा.",
-    gmail_paste: "Gmail उघडत आहे. पत्र कॉपी झाले आहे; ते संदेशात पेस्ट करा.",
     link_copied: "लिंक कॉपी झाली.",
     copy_failed: "कॉपी करता आले नाही. कृपया मजकूर निवडून कॉपी करा.",
     share_text: "७०,००० छोट्या भुंगेऱ्यांमुळे वडाळे तलाव सावरतो आहे. हाताने सफाई झाल्यास त्यांचे काम वाया जाऊ शकते. आपल्या खासदार आणि आमदारांना एक ईमेल पाठवा. फक्त ३० सेकंद लागतात:",
@@ -235,7 +221,6 @@ const state = {
   lang: "en",
   weed: { ...CONFIG.weedSnapshot, live: false },
   count: null,          // null = counter not reachable
-  awaiting: false,      // an email was opened; ask "did you send it?" on return
 };
 
 function pickLanguage() {
@@ -274,12 +259,6 @@ function mailtoUrl(p) {
   return `mailto:${p.to.join(",")}?cc=${p.cc.join(",")}&subject=${encodeURIComponent(p.subject)}&body=${body}`;
 }
 
-function gmailUrl(p, withBody = true) {
-  const base = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(p.to.join(","))}` +
-    `&cc=${encodeURIComponent(p.cc.join(","))}&su=${encodeURIComponent(p.subject)}`;
-  return withBody ? `${base}&body=${encodeURIComponent(p.body)}` : base;
-}
-
 function plainCopy(p) {
   const t = T[state.lang];
   return `${t.lbl_to}: ${p.to.join(", ")}\n${t.lbl_cc}: ${p.cc.join(", ")}\n${t.lbl_subject}: ${p.subject}\n\n${p.body}`;
@@ -300,9 +279,6 @@ function renderLetter() {
   $("m-body").lang = lang;
 
   $("send-mailto").href = mailtoUrl(p);
-  const g = gmailUrl(p);
-  $("send-gmail").href = g.length <= CONFIG.gmailMaxUrl ? g : gmailUrl(p, false);
-  $("send-gmail").dataset.paste = g.length <= CONFIG.gmailMaxUrl ? "" : "1";
 }
 
 /* ---------- page language ---------- */
@@ -381,7 +357,8 @@ function renderCount() {
 
 async function counter(action) {
   const c = CONFIG.counter;
-  const res = await fetch(`${c.base}/${action}/${c.namespace}/${c.key}`, { cache: "no-store" });
+  // keepalive: the request still completes when the mail app takes over the screen
+  const res = await fetch(`${c.base}/${action}/${c.namespace}/${c.key}`, { cache: "no-store", keepalive: true });
   if (res.status === 404) return 0;           // nobody has sent one yet
   if (!res.ok) throw new Error(res.status);
   return Number((await res.json()).value) || 0;
@@ -426,52 +403,32 @@ function requireName(ev) {
   return false;
 }
 
-function askIfSent() {
-  if (!state.awaiting) return;
-  state.awaiting = false;
-  $("thanks").hidden = true;
-  $("confirm").hidden = false;
-  $("confirm").scrollIntoView({ behavior: "smooth", block: "nearest" });
-}
-
-function opened() {
-  state.awaiting = true;
-  // On a phone the mail app covers the page, so ask when the person comes back.
-  // On a computer the page may never be hidden, so also ask after a short wait.
-  setTimeout(() => { if (document.visibilityState === "visible") askIfSent(); }, 4000);
+// Tapping "Open in my email app" counts as one email (once per device) and
+// shows the thank-you with the share buttons, ready for when the person returns.
+function emailOpened() {
+  countMyEmail();
+  $("thanks").hidden = false;
+  state.showThanks = true;
 }
 
 function wire() {
   document.querySelectorAll(".lang button").forEach((b) => b.addEventListener("click", () => setLanguage(b.dataset.lang)));
   ["f-name", "f-area"].forEach((id) => $(id).addEventListener("input", () => { note(""); renderLetter(); }));
 
-  $("send-mailto").addEventListener("click", (ev) => { if (requireName(ev)) { note(""); opened(); } });
-
-  $("send-gmail").addEventListener("click", async (ev) => {
-    if (!requireName(ev)) return;
-    note("");
-    if (ev.currentTarget.dataset.paste) {
-      const ok = await copyText(letterParts().body);
-      note(ok ? T[state.lang].gmail_paste : T[state.lang].copy_failed, !ok);
-    }
-    opened();
-  });
+  $("send-mailto").addEventListener("click", (ev) => { if (requireName(ev)) { note(""); emailOpened(); } });
 
   $("copy-text").addEventListener("click", async (ev) => {
     if (!requireName(ev)) return;
     const ok = await copyText(plainCopy(letterParts()));
     note(ok ? T[state.lang].copied : T[state.lang].copy_failed, !ok);
-    if (ok) opened();
   });
 
-  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") askIfSent(); });
-
-  $("confirm-yes").addEventListener("click", () => {
-    $("confirm").hidden = true;
-    $("thanks").hidden = false;
-    countMyEmail();
+  // Back from the mail app: bring the thank-you into view.
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState !== "visible" || !state.showThanks) return;
+    state.showThanks = false;
+    $("thanks").scrollIntoView({ behavior: "smooth", block: "nearest" });
   });
-  $("confirm-no").addEventListener("click", () => { $("confirm").hidden = true; });
 
   const shareUrl = () => location.origin + location.pathname + (state.lang === "mr" ? "?lang=mr" : "");
   $("share-wa").addEventListener("click", (ev) => {

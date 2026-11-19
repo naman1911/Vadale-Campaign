@@ -169,7 +169,7 @@ html[lang="mr"] .reasons h3 { line-height: 1.45; }
   }
   .composer .fields { grid-column: 1; grid-template-columns: 1fr; }
   .composer .paper { grid-column: 2; grid-row: 1 / -1; margin-top: 0; }
-  .composer .actions, .composer .confirm, .composer .thanks { grid-column: 1; }
+  .composer .actions, .composer .thanks { grid-column: 1; }
 }
 .fields { display: grid; gap: 16px; grid-template-columns: 1fr; }
 @media (min-width: 640px) { .fields { grid-template-columns: 1fr 1fr; } .field-lang { grid-column: 1 / -1; } }
@@ -206,20 +206,17 @@ html[lang="mr"] .body { line-height: 1.85; }
 .body .sig { background: #fbeeda; border-radius: 4px; padding: 0 3px; }
 
 .actions { margin-top: 22px; }
-.alt { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
-.alt .btn { padding-inline: 12px; }
+.btn-wide { width: 100%; margin-top: 12px; }
 .note { min-height: 1.5em; margin-top: 12px; color: #1f6b33; font-weight: 700; }
 .privacy { margin-top: 4px; color: var(--muted); font-size: .92rem; }
 
-.confirm, .thanks {
+.thanks {
   margin-top: 22px; padding: 20px; border-radius: var(--radius);
-  background: #eaf3f1; border: 1px solid #c9dedb;
+  background: #fbefdc; border: 1px solid #efd5ae;
 }
-.confirm-q { font: 400 1.35rem/1.3 var(--serif); color: var(--deep); }
 .confirm-btns { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 14px; }
-.thanks { background: #fbefdc; border-color: #efd5ae; }
 .thanks h3 { font: 400 1.5rem/1.3 var(--serif); color: var(--deep); }
-html[lang="mr"] .thanks h3, html[lang="mr"] .confirm-q { line-height: 1.45; }
+html[lang="mr"] .thanks h3 { line-height: 1.45; }
 .thanks p { margin-top: 6px; color: var(--ink-2); }
 
 /* ---------- footer ---------- */

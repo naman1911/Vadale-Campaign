@@ -10,7 +10,7 @@ The page also shows two live numbers:
 
 - **Weed cover right now**, read from [Vadale Lake Watch](https://naman1911.github.io/Vadale-Watch/)
   (`data/site.json`), with that date's satellite weed map.
-- **Emails sent**, a shared counter that goes up when someone confirms on the page that they sent the email.
+- **Emails sent**, a shared counter that goes up when someone taps "Open in my email app".
 
 ## Publishing it (one time)
 
@@ -42,7 +42,8 @@ A link ending in `?lang=mr` opens the page directly in Marathi.
   highest reading of the previous 45 days. If the tracker cannot be reached it shows a saved figure
   (`CONFIG.weedSnapshot`), always labelled with its date. The same sentence goes into the letter.
 - **Emails sent.** The site cannot see anyone's mailbox, so it cannot know that an email really left.
-  After the mail app opens, the page asks "Did you send the email?" and counts a "Yes", once per device.
+  It counts each tap on "Open in my email app", once per device, so a few people who open the email
+  but do not send it are included.
   The count is kept by [Abacus](https://abacus.jasoncameron.dev), a free public counting service.
   No name, email address or other personal detail is sent to it. Because the counter is public,
   it is an honest indication, not an audited figure.
